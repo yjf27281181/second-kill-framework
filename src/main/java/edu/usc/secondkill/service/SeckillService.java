@@ -30,6 +30,10 @@ public interface SeckillService {
 
     //different ways to make data consistence
     Result startSeckill(Long seckillId, Long userId);
-    Result startSeckillLoct(Long seckillId, Long userId);
+    Result startSeckillLock(Long seckillId, Long userId);
+    Result startSeckillAopLock(Long seckillId, Long userId);
+    Result startSeckillDBPCC_ONE(Long seckillId, Long userId);
+    Result startSeckillDBPCC_TWO(Long seckillId, Long userId);
+    Result startSeckillDBOCC(Long seckillId, Long userId);
 
 }

@@ -1,6 +1,7 @@
 package edu.usc.secondkill.service;
 
 import edu.usc.secondkill.common.aop.ServiceLimit;
+import edu.usc.secondkill.common.aop.ServiceLock;
 import edu.usc.secondkill.common.dynamicquery.DynamicQuery;
 import edu.usc.secondkill.common.entities.Result;
 import edu.usc.secondkill.common.entities.Seckill;
@@ -80,7 +81,7 @@ public class SeckillServiceImpl implements  SeckillService {
 
     @Override
     @Transactional
-    public Result startSeckillLoct(Long seckillId, Long userId) {
+    public Result startSeckillLock(Long seckillId, Long userId) {
         Result result = null;
         try {
             lock.lock();
@@ -100,6 +101,66 @@ public class SeckillServiceImpl implements  SeckillService {
         }
         return Result.ok(SeckillStatEnum.SUCCESS);
     }
+
+    @Override
+    @ServiceLock
+    @Transactional
+    public Result startSeckillAopLock(Long seckillId, Long userId) {
+        String nativeSql = "SELECT number FROM seckill WHERE seckill_id=?1";
+        Object object = dynamicQuery.nativeQueryObject(nativeSql, new Object[]{seckillId});
+        Long number =  ((Number) object).longValue();
+        if(number > 0) {
+            nativeSql = "UPDATE seckill SET number = number-1 WHERE seckill_id=?";
+            dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
+            saveKilled(seckillId, userId);
+            return Result.ok(SeckillStatEnum.SUCCESS);
+        } else
+            return Result.error(SeckillStatEnum.END);
+    }
+
+    @Override
+    @Transactional
+    public Result startSeckillDBPCC_ONE(Long seckillId, Long userId) {
+        String nativeSql = "SELECT number FROM seckill WHERE seckill_id=? FOR UPDATE";
+        Object object = dynamicQuery.nativeQueryObject(nativeSql, new Object[]{seckillId});
+        Long number =  ((Number) object).longValue();
+        if(number > 0) {
+            nativeSql = "UPDATE seckill SET number = number-1 WHERE seckill_id=?";
+            dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
+            saveKilled(seckillId, userId);
+            return Result.ok(SeckillStatEnum.SUCCESS);
+        } else
+            return Result.error(SeckillStatEnum.END);
+    }
+
+    @Override
+    @Transactional
+    public Result startSeckillDBPCC_TWO(Long seckillId, Long userId) {
+        String nativeSql = "UPDATE seckill SET number = number-1 WHERE seckill_id=? AND number>0";
+        int count = dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
+        if(count>0) {
+            saveKilled(seckillId, userId);
+            return Result.ok(SeckillStatEnum.SUCCESS);
+        } else
+            return Result.error(SeckillStatEnum.END);
+    }
+
+    @Override
+    @Transactional
+    public Result startSeckillDBOCC(Long seckillId, Long userId) {
+        Optional<Seckill> optionalSeckill = seckillRepository.findById(seckillId);
+        Seckill kill = optionalSeckill.orElse(null);
+        if(kill.getNumber() > 0) {
+            String nativeSql = "UPDATE seckill SET number=number-1 WHERE seckill_id=? AND version=?";
+            int count = dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{userId, kill.getVersion()});
+            if(count > 0) {
+                saveKilled(seckillId, userId);
+                return Result.ok(SeckillStatEnum.SUCCESS);
+            }
+        }
+        return Result.error(SeckillStatEnum.END);
+    }
+
 
     private void saveKilled(Long seckillId, Long userId) {
 

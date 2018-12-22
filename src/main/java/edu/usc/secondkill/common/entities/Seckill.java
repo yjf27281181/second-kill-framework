@@ -2,6 +2,7 @@ package edu.usc.secondkill.common.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -10,6 +11,7 @@ import java.sql.Timestamp;
 @Entity
 @Table
 @AllArgsConstructor
+@NoArgsConstructor
 public class Seckill {
     private static final long serialVersionUID = 1L;
 

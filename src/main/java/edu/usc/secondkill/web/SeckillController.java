@@ -61,4 +61,154 @@ public class SeckillController {
         return Result.ok();
     }
 
+    @ApiOperation(value="method 2 using reenter lock", nickname = "YanJF")
+    @PostMapping("/startWithLock")
+    public Result startWithLock(Long seckillId) {
+        int skillNum = 1000;
+        final CountDownLatch latch = new CountDownLatch(skillNum);
+        seckillService.deleteSeckill(seckillId);
+        final long killId = seckillId;
+        LOGGER.info("start second kill, using lock");
+        for(int i=0; i<skillNum; i++) {
+            final long userId = i;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Result result = seckillService.startSeckillLock(killId, userId);
+                    LOGGER.info("user {} : {}", userId, result.get("msg"));
+                    latch.countDown();
+                }
+            };
+            executor.execute(task);;
+        }
+        try {
+            latch.await();// wait for other people
+            Long  seckillCount = seckillService.getSeckillCount(seckillId);
+            LOGGER.info("A total of {} items sold",seckillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation(value="method 3 using AOP reenter lock", nickname = "YanJF")
+    @PostMapping("/startWithAopLock")
+    public Result startWithAopLock(Long seckillId) {
+        int skillNum = 1000;
+        final CountDownLatch latch = new CountDownLatch(skillNum);
+        seckillService.deleteSeckill(seckillId);
+        final long killId = seckillId;
+        LOGGER.info("start second kill, using lock");
+        for(int i=0; i<skillNum; i++) {
+            final long userId = i;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Result result = seckillService.startSeckillAopLock(killId, userId);
+                    LOGGER.info("user {} : {}", userId, result.get("msg"));
+                    latch.countDown();
+                }
+            };
+            executor.execute(task);;
+        }
+        try {
+            latch.await();// wait for other people
+            Long  seckillCount = seckillService.getSeckillCount(seckillId);
+            LOGGER.info("A total of {} items sold",seckillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation(value="method 4 using database pessimistic concurrency", nickname = "YanJF")
+    @PostMapping("/startWithDBPCC_ONE")
+    public Result startWithDBPCC_ONE(Long seckillId) {
+        int skillNum = 1000;
+        final CountDownLatch latch = new CountDownLatch(skillNum);
+        seckillService.deleteSeckill(seckillId);
+        final long killId = seckillId;
+        LOGGER.info("start second kill, using lock");
+        for(int i=0; i<skillNum; i++) {
+            final long userId = i;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Result result = seckillService.startSeckillDBPCC_ONE(killId, userId);
+                    LOGGER.info("user {} : {}", userId, result.get("msg"));
+                    latch.countDown();
+                }
+            };
+            executor.execute(task);;
+        }
+        try {
+            latch.await();// wait for other people
+            Long  seckillCount = seckillService.getSeckillCount(seckillId);
+            LOGGER.info("A total of {} items sold",seckillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation(value="method 5 using database pessimistic concurrency", nickname = "YanJF")
+    @PostMapping("/startWithDBPCC_TWO")
+    public Result startWithDBPCC_TWO(Long seckillId) {
+        int skillNum = 1000;
+        final CountDownLatch latch = new CountDownLatch(skillNum);
+        seckillService.deleteSeckill(seckillId);
+        final long killId = seckillId;
+        LOGGER.info("start second kill, using lock");
+        for(int i=0; i<skillNum; i++) {
+            final long userId = i;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Result result = seckillService.startSeckillDBPCC_TWO(killId, userId);
+                    LOGGER.info("user {} : {}", userId, result.get("msg"));
+                    latch.countDown();
+                }
+            };
+            executor.execute(task);;
+        }
+        try {
+            latch.await();// wait for other people
+            Long  seckillCount = seckillService.getSeckillCount(seckillId);
+            LOGGER.info("A total of {} items sold",seckillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation(value="method 6 using database optimistic concurrency", nickname = "YanJF")
+    @PostMapping("/startWithDBOCC")
+    public Result startWithDBOCC(Long seckillId) {
+        int skillNum = 1000;
+        final CountDownLatch latch = new CountDownLatch(skillNum);
+        seckillService.deleteSeckill(seckillId);
+        final long killId = seckillId;
+        LOGGER.info("start second kill, using lock");
+        for(int i=0; i<skillNum; i++) {
+            final long userId = i;
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+                    Result result = seckillService.startSeckillDBOCC(killId, userId);
+                    LOGGER.info("user {} : {}", userId, result.get("msg"));
+                    latch.countDown();
+                }
+            };
+            executor.execute(task);;
+        }
+        try {
+            latch.await();// wait for other people
+            Long  seckillCount = seckillService.getSeckillCount(seckillId);
+            LOGGER.info("A total of {} items sold",seckillCount);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return Result.ok();
+    }
+
 }
