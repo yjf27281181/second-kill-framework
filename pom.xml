@@ -81,6 +81,11 @@
             <artifactId>redisson</artifactId>
             <version>2.11.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>2.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>
