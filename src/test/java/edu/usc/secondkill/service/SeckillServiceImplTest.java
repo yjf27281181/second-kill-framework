@@ -20,7 +20,6 @@ public class SeckillServiceImplTest {
 
     @Test
     public void startSeckill() {
-        Result result = seckillService.startSeckill(1000L,1L);
-        LOGGER.info(result.toString());
+
     }
 }

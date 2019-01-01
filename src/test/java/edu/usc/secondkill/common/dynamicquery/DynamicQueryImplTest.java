@@ -27,10 +27,7 @@ public class DynamicQueryImplTest {
 
     @Test
     public void save() {
-        dq.save(new Seckill(1L, "iphone", 100,
-                new Timestamp(new Date().getTime()),
-                new Timestamp(new Date().getTime()),
-                new Timestamp(new Date().getTime()), 1));
+
     }
 
     @Test
@@ -48,6 +45,7 @@ public class DynamicQueryImplTest {
 
     @Test
     public void nativeQueryList() {
+        System.out.println("shuaibushuaiqi???????");
     }
 
     @Test

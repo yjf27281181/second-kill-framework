@@ -22,6 +22,7 @@ public class Seckill {
 
     private String name;
     private int number;
+    private int price;
     private Timestamp startTime;
     private Timestamp endTime;
     private Timestamp createTime;
