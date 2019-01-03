@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum SeckillStatEnum {
     MUCH(2,"too many people"),
-    SUCCESS(1,"success"),
+    SUCCESS(1,"successful"),
     END(0,"activity is over"),
-    REPEAT_KILL(-1,"repead kill"),
+    REPEAT_KILL(-1,"can only buy one"),
     INNER_ERROR(-2,"system error"),
     DATE_REWRITE(-3,"data is tampered");
 

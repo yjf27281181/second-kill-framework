@@ -7,11 +7,14 @@ import edu.usc.secondkill.common.entities.Result;
 import edu.usc.secondkill.common.entities.Seckill;
 import edu.usc.secondkill.common.entities.SuccessKilled;
 import edu.usc.secondkill.common.enums.SeckillStatEnum;
+import edu.usc.secondkill.common.exceptions.SeckillRepeatedException;
 import edu.usc.secondkill.repository.SeckillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -82,7 +85,6 @@ public class SeckillServiceImpl implements  SeckillService {
     @Override
     @Transactional
     public Result startSeckillLock(Long seckillId, Long userId) {
-        Result result = null;
         try {
             lock.lock();
             String nativeSql = "SELECT number FROM seckill WHERE seckill_id=?";
@@ -94,8 +96,11 @@ public class SeckillServiceImpl implements  SeckillService {
                 saveKilled(seckillId, userId);
             } else
                 return Result.error(SeckillStatEnum.END);
+        } catch (SeckillRepeatedException e) {
+            return Result.error(SeckillStatEnum.MUCH);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            return Result.error(SeckillStatEnum.MUCH);
         } finally {
             lock.unlock();
         }
@@ -124,13 +129,17 @@ public class SeckillServiceImpl implements  SeckillService {
         String nativeSql = "SELECT number FROM seckill WHERE seckill_id=? FOR UPDATE";
         Object object = dynamicQuery.nativeQueryObject(nativeSql, new Object[]{seckillId});
         Long number =  ((Number) object).longValue();
-        if(number > 0) {
-            nativeSql = "UPDATE seckill SET number = number-1 WHERE seckill_id=?";
-            dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
-            saveKilled(seckillId, userId);
-            return Result.ok(SeckillStatEnum.SUCCESS);
-        } else
-            return Result.error(SeckillStatEnum.END);
+        try {
+            if(number > 0) {
+                nativeSql = "UPDATE seckill SET number = number-1 WHERE seckill_id=?";
+                dynamicQuery.nativeExecuteUpdate(nativeSql, new Object[]{seckillId});
+                saveKilled(seckillId, userId);
+                return Result.ok(SeckillStatEnum.SUCCESS);
+            } else
+                return Result.error(SeckillStatEnum.END);
+        } catch (Exception e) {
+            return Result.error(SeckillStatEnum.MUCH);
+        }
     }
 
     @Override
@@ -164,11 +173,15 @@ public class SeckillServiceImpl implements  SeckillService {
 
     private void saveKilled(Long seckillId, Long userId) {
 
-            SuccessKilled killed = new SuccessKilled();
-            killed.setSeckillId(seckillId);
-            killed.setUserId(userId);
-            killed.setState((short) 0);
-            killed.setCreateTime(new Timestamp(new Date().getTime()));
+        SuccessKilled killed = new SuccessKilled();
+        killed.setSeckillId(seckillId);
+        killed.setUserId(userId);
+        killed.setState((short) 0);
+        killed.setCreateTime(new Timestamp(new Date().getTime()));
+        try {
             dynamicQuery.save(killed);
+        } catch (SQLException e) {
+            throw new SeckillRepeatedException("repeated kill");
+        }
     }
 }

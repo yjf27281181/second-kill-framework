@@ -6,6 +6,7 @@ import edu.usc.secondkill.common.dynamicquery.DynamicQuery;
 import edu.usc.secondkill.common.entities.Result;
 import edu.usc.secondkill.common.entities.SuccessKilled;
 import edu.usc.secondkill.common.enums.SeckillStatEnum;
+import edu.usc.secondkill.common.exceptions.SeckillRepeatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +84,6 @@ public class SeckillDistributedServiceImpl implements SeckillDistributedService 
         killed.setUserId(userId);
         killed.setState((short) 0);
         killed.setCreateTime(new Timestamp(new Date().getTime()));
-        dynamicQuery.save(killed);
+
     }
 }

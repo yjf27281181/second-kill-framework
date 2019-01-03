@@ -7,10 +7,9 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -209,6 +208,13 @@ public class SeckillController {
             e.printStackTrace();
         }
         return Result.ok();
+    }
+
+    @GetMapping("/time/now")
+    @ResponseBody
+    public Long time() {
+        Date now = new Date();
+        return now.getTime();
     }
 
 }

@@ -1,5 +1,6 @@
 package edu.usc.secondkill.common.dynamicquery;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface DynamicQuery {
@@ -7,7 +8,7 @@ public interface DynamicQuery {
     /**
      * CRUD
      */
-    public void save(Object entity);
+    public void save(Object entity) throws SQLException;
     public void update(Object entity);
     public <T> void delete(Class<T> entityClass, Object entityId);
     public <T> void delete(Class<T> entityClass, Object[] entityIds);
